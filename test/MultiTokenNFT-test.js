@@ -1,10 +1,11 @@
 const { expect } = require('chai')
+const { BigNumber } = require('ethers')
 const { ethers } = require('hardhat')
 const {parseEther} = ethers.utils
 
 describe.only('MultiTokenNFT', function () {
   let MultiTokenNFT, tokenContract, owner, addr1, addr2, addr3, addrs
-  beforeEach(async function () {
+  before(async function () {
     MultiTokenNFT = await ethers.getContractFactory('MultiTokenNFT')
 
    ; [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners()
@@ -16,23 +17,27 @@ describe.only('MultiTokenNFT', function () {
       expect(await tokenContract.name()).to.equal("Asad")
     })
 
+    it('Should be Owner', async function () {
+      expect(await tokenContract.callStatic.owner()).to.be.equal(owner.address)
+    })
+
     it('Should set the right TRIANGLE', async function () {
-      expect(await tokenContract.TRIANGLE()).to.equal(0)
+      expect(await tokenContract.callStatic.TRIANGLE()).to.equal(0)
     })
     it('Should set the right PENTAGON', async function () {
-      expect(await tokenContract.PENTAGON()).to.equal(1)
+      expect(await tokenContract.callStatic.PENTAGON()).to.equal(1)
     })
     it('Should set the right HEXAGON', async function () {
-      expect(await tokenContract.HEXAGON()).to.equal(2)
+      expect(await tokenContract.callStatic.HEXAGON()).to.equal(2)
     })
     it('Should set the right DIAMOND', async function () {
-      expect(await tokenContract.DIAMOND()).to.equal(3)
+      expect(await tokenContract.callStatic.DIAMOND()).to.equal(3)
     })
     it('Should set the right ARC', async function () {
-      expect(await tokenContract.ARC()).to.equal(4)
+      expect(await tokenContract.callStatic.ARC()).to.equal(4)
     })
     it('Should set the right STAR', async function () {
-      expect(await tokenContract.STAR()).to.equal(5)
+      expect(await tokenContract.callStatic.STAR()).to.equal(5)
     })
     it('Should set the right Supply Greater', async function () {
       await expect(
@@ -41,22 +46,49 @@ describe.only('MultiTokenNFT', function () {
     })
     it('Should be minted', async function () {
       await tokenContract.connect(owner).mintToken(1,10)
+      await tokenContract.connect(owner).mintToken(2,10)
+      await tokenContract.connect(owner).mintToken(3,10)
       expect(await tokenContract.callStatic.balanceOf(owner.address,1)).to.be.equal(10)
       await tokenContract.safeTransferFrom(owner.address,addr1.address,1,5,"0x00")
       expect(await tokenContract.balanceOf(owner.address,1)).to.be.equal(5)
     })
 
     it('Should be balanceOf', async function () {
-      expect(await tokenContract.callStatic.balanceOf(owner.address,1)).to.be.equal(10)
+      expect(await tokenContract.callStatic.balanceOf(owner.address,1)).to.be.equal(5)
     })
 
     // it('Should be TransferOwner', async function () {
+    //   console.log(tokenContract.functions)
     //   await tokenContract.transferOwnership(addr1.address)
     // })
 
-    // it('Should be SafeTransferFrom', async function () {
-    //   await tokenContract.safeTransferFrom(owner.address,addr1.address,1,5,"0x00")
-    // })
+    it('Should be SafeTransferFrom', async function () {
+      await tokenContract.safeTransferFrom(owner.address,addr1.address,1,5,"0x00")
+    })
+
+    it('Should be TotallSupply', async function () {
+      expect(await tokenContract.callStatic.totalSupply(1)).to.be.equal(10)
+    })
+
+    it('Should be Check Id Exits', async function () {
+      expect(await tokenContract.callStatic.exists(1)).to.be.equal(true)
+    })
+    it('Should be Check Id Not Exits', async function () {
+      expect(await tokenContract.callStatic.exists(10)).to.be.equal(false)
+    })
+    it('Should be URI', async function () {
+      expect(await tokenContract.uri(1)).to.be.equal("https://game.example/1.json")
+    })
+
+    it('Should be batchMint', async function () {
+      await tokenContract.connect(owner).mintBatch(owner.address,[1,2,3],[20,30,40],0x00)
+    })
+
+    it('Should be balanceOfbatch', async function () {
+      expect(await tokenContract.callStatic.balanceOfBatch([owner.address,owner.address,owner.address],[1,2,3])).to.be.equal([BigNumber.from('20'),BigNumber.from('40'),BigNumber.from('50')])
+    })
+
+    
 
   })
 })
