@@ -15,13 +15,13 @@ contract MultiTokenNFT  is ERC1155Supply {
     uint256 public constant ARC = 4;
     uint256 public constant STAR = 5;
 
-    uint256 maxSupplyEachToken = 10;
+    uint256 public constant maxSupplyEachToken = 10;
 
     string private _name;
 
     event TokenMinted(address account, uint256 tokenId, uint256 amount);
 
-    // Typical URI "https://game.example/api/item/{id}.json"
+    
     constructor(string memory name_, string memory _uri) ERC1155(_uri){
         _name = name_;
     }
