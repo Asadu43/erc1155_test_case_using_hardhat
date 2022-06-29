@@ -44,6 +44,11 @@ describe.only('MultiTokenNFT', function () {
         tokenContract.mintToken(1,15),
       ).to.be.revertedWith('Not enough supply')
     })
+    it('Should set the right Owner', async function () {
+      await expect(
+        tokenContract.connect(addr1).mintToken(1,15),
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
     it('Should be minted', async function () {
       await tokenContract.connect(owner).mintToken(1,10)
       await tokenContract.connect(owner).mintToken(2,10)
@@ -57,12 +62,10 @@ describe.only('MultiTokenNFT', function () {
       expect(await tokenContract.callStatic.balanceOf(owner.address,1)).to.be.equal(5)
     })
 
-    // it('Should be TransferOwner', async function () {
-    //   console.log(tokenContract.functions)
-    //   await tokenContract.transferOwnership(addr1.address)
-    // })
+
 
     it('Should be SafeTransferFrom', async function () {
+      console.log(tokenContract.functions)
       await tokenContract.safeTransferFrom(owner.address,addr1.address,1,5,"0x00")
     })
 
@@ -80,15 +83,32 @@ describe.only('MultiTokenNFT', function () {
       expect(await tokenContract.uri(1)).to.be.equal("https://game.example/1.json")
     })
 
+    it('Should be set Right Owner', async function () {
+      await  expect( tokenContract.connect(addr1).mintBatch(owner.address,[1,2,3],[20,30,40],0x00)).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
     it('Should be batchMint', async function () {
-      await tokenContract.connect(owner).mintBatch(owner.address,[1,2,3],[20,30,40],0x00)
+      await tokenContract.connect(owner).mintBatch(owner.address,[1,2,3],[BigNumber.from(20),BigNumber.from(30),BigNumber.from(40)],0x00)
     })
 
     it('Should be balanceOfbatch', async function () {
-      expect(await tokenContract.callStatic.balanceOfBatch([owner.address,owner.address,owner.address],[1,2,3])).to.be.equal([BigNumber.from('20'),BigNumber.from('40'),BigNumber.from('50')])
+      // console.log(BigNumber.from("20"))
+       expect(await tokenContract.callStatic.balanceOfBatch([owner.address,owner.address,owner.address],[1,2,3])).to.deep.equals([BigNumber.from("20"),BigNumber.from("40"),BigNumber.from("50")])
     })
 
-    
+    it("should return isApproval", async function () {
+      expect(await tokenContract.isApprovedForAll(owner.address,addr1.address)).to.equal(false)
+    })
+
+    it("should return setApproval", async function () {
+      await tokenContract.connect(owner).setApprovalForAll(addr1.address,true)
+      expect(await tokenContract.isApprovedForAll(owner.address,addr1.address)).to.equal(true)
+    })
+
+        it('Should be TransferOwner', async function () {
+      console.log(tokenContract.functions)
+      await tokenContract.transferOwnership(addr1.address)
+    })
 
   })
 })
